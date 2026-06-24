@@ -138,7 +138,8 @@ const server = http.createServer(async (req, res) => {
         }
         
         if (metadata) {
-          fs.writeFileSync(path.join(sceneDir, 'meta.json'), JSON.stringify(metadata, null, 2));
+          const metaClean = metadata.replace(/\r/g, '').trim();
+          fs.writeFileSync(path.join(sceneDir, 'meta.json'), JSON.stringify(JSON.parse(metaClean), null, 2));
         }
         
         const pushed = gitCommit(slug, metadata);

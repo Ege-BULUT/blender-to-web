@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback } from "react";
 import { useTranslation } from "@/lib/translations/useTranslation";
 
+const LOCAL_SERVICE_URL = "http://localhost:3456/upload";
+
 export default function UploadButton() {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -86,21 +88,25 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
     setStep("processing");
     
     try {
-      // Create FormData
       const formData = new FormData();
       
-      // Append all files
       for (let i = 0; i < files.length; i++) {
         formData.append("files", files[i]);
       }
       
-      // Append metadata as JSON
       if (metadata) {
         formData.append("metadata", JSON.stringify(metadata));
       }
       
-      // Send to API
-      const response = await fetch("/api/upload", {
+      let uploadUrl = "/api/upload";
+      try {
+        const healthCheck = await fetch("http://localhost:3456/health", { method: "GET" });
+        if (healthCheck.ok) uploadUrl = LOCAL_SERVICE_URL;
+      } catch {
+        // Local service not available, use API
+      }
+      
+      const response = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
       });
