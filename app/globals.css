@@ -1155,6 +1155,53 @@ code {
   line-height: 1.4;
 }
 
+.upload-file-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.upload-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(96,165,250,0.1);
+  border: 1px solid rgba(96,165,250,0.2);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.upload-file-chip.meta {
+  background: rgba(96,165,250,0.05);
+  border-color: rgba(96,165,250,0.12);
+}
+
+.upload-file-size {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.upload-file-icon {
+  font-size: 14px;
+}
+
+.upload-hints {
+  margin-bottom: 12px;
+}
+
+.upload-hints .upload-hint {
+  margin-bottom: 4px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
 /* =====EDITOR===== */
 .editor-shell {
   position: fixed;

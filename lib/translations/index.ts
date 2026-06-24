@@ -77,8 +77,13 @@ export const translations = {
     metadataAuthor: "Yazar",
     confirmUpload: "Yükle",
     cancel: "İptal",
-    uploadSuccess: "Sahne başarıyla yüklendi!",
-    uploadError: "Yükleme sırasında bir hata oluştu.",
+    uploadSuccess: "Scene uploaded successfully!",
+    uploadError: "An error occurred during upload.",
+    selectSceneFile: "Select Scene File",
+    selectMetaFile: "Select Metadata",
+    sceneFile: "Scene File:",
+    metaFile: "Metadata:",
+    addMetaFile: "Add Metadata",
   },
   
   en: {
