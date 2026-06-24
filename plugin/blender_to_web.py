@@ -15,7 +15,7 @@ import re
 import zipfile
 from datetime import datetime, timezone
 
-EXPORTER_VERSION = "0.2.0"
+EXPORTER_VERSION = "0.3.0"
 
 
 def slugify(value: str) -> str:
@@ -62,9 +62,39 @@ def write_meta(path: str, props) -> None:
         "exporter_version": EXPORTER_VERSION,
         "scene_name": scene.name,
         "camera_default": active_camera_dict(),
+        "export_settings": {
+            "max_texture_size": getattr(props, "max_texture_size", 0),
+            "jpeg_quality": getattr(props, "jpeg_quality", 85),
+            "bake_textures": getattr(props, "bake_textures", False),
+            "include_cameras": getattr(props, "include_cameras", True),
+            "include_lights": getattr(props, "include_lights", True),
+        },
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2, ensure_ascii=False)
+
+
+def resize_image(img, max_size):
+    if img.size[0] <= max_size and img.size[1] <= max_size:
+        return
+    ratio = min(max_size / img.size[0], max_size / img.size[1])
+    new_w = int(img.size[0] * ratio)
+    new_h = int(img.size[1] * ratio)
+    img.scale(new_w, new_h)
+
+
+def bake_node_textures(material, max_size, jpeg_quality):
+    if not material.use_nodes:
+        return
+    for node in material.node_tree.nodes:
+        if node.type == 'TEX_IMAGE' and node.image:
+            img = node.image
+            if max_size > 0:
+                resize_image(img, max_size)
+            if img.filepath_raw:
+                img.filepath_raw = bpy.path.ensure_ext(img.filepath_raw, '.jpg')
+            img.file_format = 'JPEG'
+            img.quality = jpeg_quality
 
 
 class WEBGALLERY_OT_export(bpy.types.Operator):
@@ -113,6 +143,25 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
         name="Include Lights",
         default=True,
     )
+    max_texture_size: bpy.props.IntProperty(
+        name="Max Texture Size",
+        description="Texture'lari bu boyuta kadar kucult (0 = limit yok)",
+        default=1024,
+        min=0,
+        max=4096,
+    )
+    jpeg_quality: bpy.props.IntProperty(
+        name="JPEG Quality",
+        description="Texture kalitesi (1-100, 100 = kayipsiz)",
+        default=85,
+        min=1,
+        max=100,
+    )
+    bake_textures: bpy.props.BoolProperty(
+        name="Bake Textures",
+        description="Tum texture'lari diffuse'a bake et (dosya boyutunu kuculturur)",
+        default=False,
+    )
 
     @classmethod
     def poll(cls, context):
@@ -138,6 +187,18 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
 
         glb_path = os.path.join(scene_dir, "scene.glb")
         meta_path = os.path.join(scene_dir, "meta.json")
+
+        if self.bake_textures:
+            try:
+                self._bake_all_textures(context)
+            except Exception as exc:
+                self.report({"WARNING"}, f"Texture baking failed: {exc}")
+
+        if self.max_texture_size > 0:
+            try:
+                self._resize_textures(self.max_texture_size)
+            except Exception as exc:
+                self.report({"WARNING"}, f"Texture resize failed: {exc}")
 
         try:
             bpy.ops.export_scene.gltf(
@@ -165,10 +226,49 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
                 zf.write(glb_path, "scene.glb")
                 zf.write(meta_path, "meta.json")
         except Exception as exc:
-            self.report({"WARNING"}, f"ZIP creation failed: {exc}, GLB+JSON exported separately")
+            self.report({"WARNING"}, f"ZIP creation failed: {exc}")
 
         self.report({"INFO"}, f"Exported to {scene_dir}" + (f" + {zip_path}" if os.path.exists(zip_path) else ""))
         return {"FINISHED"}
+
+    def _bake_all_textures(self, context):
+        orig_engine = context.scene.render.engine
+        context.scene.render.engine = 'CYCLES'
+        context.scene.cycles.bake_type = 'DIFFUSE'
+        context.scene.render.bake.use_pass_direct = False
+        context.scene.render.bake.use_pass_indirect = False
+        context.scene.render.bake.use_selected_to_active = False
+
+        selected = context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+
+        for obj in context.scene.objects:
+            if obj.type != 'MESH':
+                continue
+            obj.select_set(True)
+            context.view_layer.objects.active = obj
+            if obj.data.materials:
+                try:
+                    bpy.ops.object.bake(type='DIFFUSE')
+                except Exception:
+                    pass
+            obj.select_set(False)
+
+        for obj in selected:
+            obj.select_set(True)
+        context.scene.render.engine = orig_engine
+
+    def _resize_textures(self, max_size):
+        for img in bpy.data.images:
+            if img.name == 'Render Result':
+                continue
+            if img.size[0] > max_size or img.size[1] > max_size:
+                ratio = min(max_size / img.size[0], max_size / img.size[1])
+                new_w = int(img.size[0] * ratio)
+                new_h = int(img.size[1] * ratio)
+                img.scale(new_w, new_h)
+                img.file_format = 'JPEG'
+                img.quality = self.jpeg_quality
 
 
 def menu_func_export(self, context):
