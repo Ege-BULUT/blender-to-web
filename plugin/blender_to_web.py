@@ -181,12 +181,12 @@ classes = (WEBGALLERY_OT_export,)
 def register():
     for c in classes:
         bpy.utils.register_class(c)
-    bpy.types.TOPBAR_MT_file_export_links.append(menu_func_export)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
 
 def unregister():
     try:
-        bpy.types.TOPBAR_MT_file_export_links.remove(menu_func_export)
+        bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     except ValueError:
         pass
     for c in reversed(classes):

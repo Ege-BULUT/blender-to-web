@@ -1,4 +1,4 @@
-/* Theme variables */
+﻿/* Theme variables */
 :root {
   --bg-primary: #222831;
   --bg-secondary: #2d343f;
@@ -218,7 +218,7 @@ code {
 }
 
 .dropdown-item.active::before {
-  content: "✓";
+  content: "âœ“";
   font-size: 11px;
   width: 14px;
   display: inline-block;
@@ -1122,7 +1122,7 @@ code {
 }
 
 .menu-item.active::before {
-  content: "✓";
+  content: "âœ“";
   font-size: 11px;
   width: 14px;
 }
@@ -1131,4 +1131,32 @@ code {
   height: 1px;
   background: var(--border-primary);
   margin: 4px 8px;
+}
+
+
+@media (max-width: 768px) {
+  .editor-shell {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 48px 1fr 1fr 40px !important;
+  }
+  .editor-left {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-primary) !important;
+  }
+  .editor-right {
+    border-left: none !important;
+    border-top: 1px solid var(--border-primary) !important;
+  }
+  .hero h1 { font-size: 32px !important; }
+  .steps { grid-template-columns: 1fr !important; }
+  .header-controls { gap: 16px !important; }
+  .landing-nav { gap: 16px !important; }
+  .landing-nav a { font-size: 12px !important; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 24px !important; }
+  .header-controls { flex-direction: column; gap: 8px !important; }
+  .landing-header { flex-direction: column; gap: 12px !important; }
+  .carousel-card { width: 260px !important; }
 }

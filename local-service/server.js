@@ -113,13 +113,13 @@ const server = http.createServer(async (req, res) => {
         }
         
         const parts = parseMultipart(buf, boundaryMatch[1]);
-        const metadata = parts.metadata ? JSON.parse(parts.metadata) : {};
-        const metaClean = metadata ? metadata.replace(/\r/g, '').trim() : '{}';
-        let metaParsed;
-        try {
-          metaParsed = JSON.parse(metaClean);
-        } catch(e) {
-          metaParsed = {};
+        let metaParsed = {};
+        if (parts.metadata) {
+          try {
+            metaParsed = JSON.parse(parts.metadata.replace(/\r/g, '').trim());
+          } catch(e) {
+            metaParsed = {};
+          }
         }
         const slug = metaParsed.slug || 'scene';
         let sceneDir = path.join(SCENES_DIR, slug);
@@ -163,7 +163,7 @@ const server = http.createServer(async (req, res) => {
           }
         }
         
-        if (metadata || zipExtracted) {
+        if (metaParsed.slug || zipExtracted) {
           try {
             const finalSlug = metaParsed.slug || slug;
             const finalDir = path.join(SCENES_DIR, finalSlug);
@@ -175,7 +175,7 @@ const server = http.createServer(async (req, res) => {
           }
         }
         
-        const pushed = gitCommit(slug, metadata);
+        const pushed = gitCommit(slug, metaParsed);
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, slug, gitPushed: pushed, scan: scanResults }));
