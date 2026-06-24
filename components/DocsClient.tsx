@@ -77,6 +77,18 @@ function ChangelogPage() {
       <p className="docs-subtitle">Blender to Web güncellemeleri ve yeni özellikler.</p>
 
       <div className="changelog-entry">
+        <div className="changelog-version">v0.3.0</div>
+        <div className="changelog-date">25 Haziran 2026</div>
+        <ul>
+          <li><strong>Texture boyut limiti:</strong> Max Texture Size ayarı ile texture&apos;ları otomatik küçültme (varsayılan: 1024px)</li>
+          <li><strong>JPEG kalitesi:</strong> Texture&apos;ları JPEG formatında export etme, kalite ayarlanabilir (varsayılan: %85)</li>
+          <li><strong>Texture bake:</strong> Tüm texture&apos;ları diffuse&apos;a bake etme seçeneği (dosya boyutunu ciddi şekilde küçültür)</li>
+          <li><strong>Export settings:</strong> Tüm export ayarları meta.json&apos;a kaydediliyor</li>
+          <li><strong>Büyük dosya temizliği:</strong> Git history&apos;den 193MB test dosyası temizlendi</li>
+        </ul>
+      </div>
+
+      <div className="changelog-entry">
         <div className="changelog-version">v0.2.0</div>
         <div className="changelog-date">25 Haziran 2026</div>
         <ul>
@@ -146,11 +158,30 @@ function BlenderPluginPage() {
             <li><strong>Tags:</strong> Virgülle ayrılmış etiketler (örn: interior, morning)</li>
             <li><strong>Slug:</strong> URL ve klasör adı (boş bırakırsan title&apos;dan üretilir)</li>
             <li><strong>Output Directory:</strong> Export klasörü</li>
+            <li><strong>Include Cameras:</strong> Kameraları da export et</li>
+            <li><strong>Include Lights:</strong> Işıkları da export et</li>
+            <li><strong>Max Texture Size:</strong> Texture&apos;ları bu boyuta kadar küçült (varsayılan: 1024, 0 = limitsiz)</li>
+            <li><strong>JPEG Quality:</strong> Texture kalitesi 1-100 arası (varsayılan: 85)</li>
+            <li><strong>Bake Textures:</strong> Tüm texture&apos;ları diffuse&apos;a bake et (dosya boyutunu küçültür)</li>
           </ul>
         </li>
         <li>Export butonuna bas</li>
         <li>Output klasöründe <code>scene.glb</code>, <code>meta.json</code> ve <code>slug.zip</code> oluşur</li>
       </ol>
+
+      <h2>Texture Optimizasyonu</h2>
+      <p>
+        Eklenti artık texture&apos;ları otomatik olarak optimize eder:
+      </p>
+      <ul>
+        <li><strong>Max Texture Size:</strong> Tüm texture&apos;ları belirtilen boyuta kadar küçültür (1024, 2048, 4096)</li>
+        <li><strong>JPEG Quality:</strong> Texture&apos;ları JPEG formatında export eder (1-100 arası kalite)</li>
+        <li><strong>Bake Textures:</strong> Tüm texture&apos;ları diffuse&apos;a bake eder (en etkili boyut küçültme yöntemi)</li>
+      </ul>
+      <p>
+        <strong>Önerilen ayarlar:</strong> Hızlı web gösterimi için Max Texture: 1024, JPEG Quality: 85.
+        Yüksek kalite için Max Texture: 2048, JPEG Quality: 90.
+      </p>
 
       <h2>ZIP Export</h2>
       <p>
