@@ -21,6 +21,16 @@ export const translations = {
     noScenesInstructions: "Blender eklentisinden export aldıktan sonra output klasörünü",
     noScenesPath: "public/scenes/<slug>/",
     noScenesInstructions2: "altına kopyalayın.",
+    publishScene: "Publish Scene",
+    publishToPublic: "Publish to Public",
+    publishToPublicHintOn: "Sahne galeriye eklenecek ve herkes tarafından görünecek. Birkaç dakika içinde sitede görünür.",
+    publishToPublicHintOff: "Sahne sadece editörde açılacak, galeriye eklenmeyecek.",
+    publishToWeb: "Web'e Yayınla",
+    openInEditor: "Editörde Aç",
+    publishing: "Yayınlanıyor...",
+    publishingHint: "Sahne web'e yayınlanıyor. GitHub'a commit atılıyor, Vercel otomatik redeploy edecek. Birkaç dakika içinde galeride görünecek.",
+    publishSuccess: "Yayınlandı!",
+    publishSuccessHint: "Sahne GitHub'a push edildi. Vercel otomatik redeploy edecek. Birkaç dakika içinde galeride görünmeli.",
     
     // About
     howItWorks: "Nasıl Çalışır?",
@@ -93,6 +103,16 @@ export const translations = {
     noScenesInstructions: "After exporting from the Blender plugin, copy the output folder to",
     noScenesPath: "public/scenes/<slug>/",
     noScenesInstructions2: "directory.",
+    publishScene: "Publish Scene",
+    publishToPublic: "Publish to Public",
+    publishToPublicHintOn: "Scene will be added to the gallery and visible to everyone. It will appear on the site within a few minutes.",
+    publishToPublicHintOff: "Scene will only open in the editor, not added to the gallery.",
+    publishToWeb: "Publish to Web",
+    openInEditor: "Open in Editor",
+    publishing: "Publishing...",
+    publishingHint: "Publishing scene to web. Committing to GitHub, Vercel will auto-redeploy. It will appear in the gallery within a few minutes.",
+    publishSuccess: "Published!",
+    publishSuccessHint: "Scene pushed to GitHub. Vercel will auto-redeploy. Should appear in the gallery within a few minutes.",
     
     // About
     howItWorks: "How It Works",
