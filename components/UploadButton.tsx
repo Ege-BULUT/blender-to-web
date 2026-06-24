@@ -12,7 +12,7 @@ export default function UploadButton() {
   return (
     <>
       <button className="btn-primary" onClick={() => setOpen(true)}>
-        {t("addNewScene")}
+        {t("publishScene")}
       </button>
 
       {open && (
@@ -27,6 +27,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
   const [files, setFiles] = useState<FileList | null>(null);
   const [metadata, setMetadata] = useState<any>(null);
   const [tagsRaw, setTagsRaw] = useState("");
+  const [publishToPublic, setPublishToPublic] = useState(false);
   const [step, setStep] = useState<"drop" | "metadata" | "processing" | "success" | "error">("drop");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       setFiles(e.dataTransfer.files);
       parseMetadata(e.dataTransfer.files);
@@ -84,20 +85,27 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = async () => {
     if (!files) return;
-    
+
+    if (!publishToPublic) {
+      const blob = await files[0].arrayBuffer();
+      const url = URL.createObjectURL(new Blob([blob]));
+      window.location.href = `/scene/__import?url=${encodeURIComponent(url)}&meta=${encodeURIComponent(JSON.stringify(metadata))}`;
+      return;
+    }
+
     setStep("processing");
-    
+
     try {
       const formData = new FormData();
-      
+
       for (let i = 0; i < files.length; i++) {
         formData.append("files", files[i]);
       }
-      
+
       if (metadata) {
         formData.append("metadata", JSON.stringify(metadata));
       }
-      
+
       let uploadUrl = "/api/upload";
       try {
         const healthCheck = await fetch("https://localhost:3457/health", { method: "GET" });
@@ -108,19 +116,19 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
           if (healthCheckHttp.ok) uploadUrl = "http://localhost:3456/upload";
         } catch {}
       }
-      
+
       const response = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setStep("success");
         setTimeout(() => {
           window.location.reload();
-        }, 1500);
+        }, 3000);
       } else {
         setStep("error");
       }
@@ -134,10 +142,10 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <h3>{t("dragDropTitle")}</h3>
+          <h3>{t("publishScene")}</h3>
           <p>{t("dragDropInstructions")}</p>
-          
-          <div 
+
+          <div
             className={`upload-area ${dragActive ? "active" : ""}`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -155,7 +163,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
             <div className="upload-content">
               <div className="upload-icon">📁</div>
               <p>{t("dragDropArea")}</p>
-              <button 
+              <button
                 className="btn-secondary"
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -163,9 +171,9 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
               </button>
             </div>
           </div>
-          
+
           <p className="upload-hint">{t("supportedFiles")}</p>
-          
+
           <div className="modal-actions">
             <button className="modal-close" onClick={onClose}>
               {t("cancel")}
@@ -180,8 +188,8 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal large" onClick={(e) => e.stopPropagation()}>
-          <h3>{t("metadataTitle")}</h3>
-          
+          <h3>{t("publishScene")}</h3>
+
           <div className="metadata-form">
             <div className="form-row">
               <label>{t("metadataSlug")}</label>
@@ -192,7 +200,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
                 placeholder="scene-name"
               />
             </div>
-            
+
             <div className="form-row">
               <label>{t("metadataTitleField")}</label>
               <input
@@ -202,7 +210,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
                 placeholder="Scene Title"
               />
             </div>
-            
+
             <div className="form-row">
               <label>{t("metadataDescription")}</label>
               <textarea
@@ -212,7 +220,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
                 rows={3}
               />
             </div>
-            
+
             <div className="form-row">
               <label>{t("metadataTags")}</label>
               <input
@@ -235,14 +243,27 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
                 placeholder="Author name"
               />
             </div>
+            <div className="form-row toggle-row">
+              <label>{t("publishToPublic")}</label>
+              <button
+                className={`toggle-btn ${publishToPublic ? "active" : ""}`}
+                onClick={() => setPublishToPublic(!publishToPublic)}
+                type="button"
+              >
+                <span className="toggle-thumb" />
+              </button>
+            </div>
+            <p className="toggle-hint">
+              {publishToPublic ? t("publishToPublicHintOn") : t("publishToPublicHintOff")}
+            </p>
           </div>
-          
+
           <div className="modal-actions">
             <button className="modal-close" onClick={onClose}>
               {t("cancel")}
             </button>
             <button className="btn-primary" onClick={handleSubmit}>
-              {t("confirmUpload")}
+              {publishToPublic ? t("publishToWeb") : t("openInEditor")}
             </button>
           </div>
         </div>
@@ -254,8 +275,11 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <h3>{t("processing")}</h3>
+          <h3>{t("publishing")}</h3>
           <div className="processing-spinner">⏳</div>
+          <p style={{ marginTop: 12, fontSize: 13, color: "var(--text-secondary)", textAlign: "center" }}>
+            {t("publishingHint")}
+          </p>
         </div>
       </div>
     );
@@ -265,7 +289,10 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
-          <h3>✅ {t("uploadSuccess")}</h3>
+          <h3>✅ {t("publishSuccess")}</h3>
+          <p style={{ marginTop: 12, fontSize: 13, color: "var(--text-secondary)", textAlign: "center" }}>
+            {t("publishSuccessHint")}
+          </p>
         </div>
       </div>
     );

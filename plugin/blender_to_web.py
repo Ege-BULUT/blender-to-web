@@ -15,7 +15,7 @@ import re
 import zipfile
 from datetime import datetime, timezone
 
-EXPORTER_VERSION = "0.1.0"
+EXPORTER_VERSION = "0.2.0"
 
 
 def slugify(value: str) -> str:
