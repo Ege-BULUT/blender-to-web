@@ -147,7 +147,7 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
             <input
               ref={fileInputRef}
               type="file"
-              {...{ webkitdirectory: "true" }}
+              accept=".glb,.gltf,.zip"
               multiple
               onChange={handleChange}
               style={{ display: "none" }}

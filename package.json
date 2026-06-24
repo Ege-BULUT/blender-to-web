@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-three/drei": "9.114.0",
     "@react-three/fiber": "8.17.10",
+    "adm-zip": "^0.5.17",
     "next": "^14.2.35",
     "node-forge": "^1.4.0",
     "react": "18.3.1",

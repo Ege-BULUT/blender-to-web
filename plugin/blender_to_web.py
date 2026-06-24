@@ -12,6 +12,7 @@ import bpy
 import json
 import os
 import re
+import zipfile
 from datetime import datetime, timezone
 
 EXPORTER_VERSION = "0.1.0"
@@ -158,7 +159,15 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
             self.report({"ERROR"}, f"meta.json write failed: {exc}")
             return {"CANCELLED"}
 
-        self.report({"INFO"}, f"Exported to {scene_dir}")
+        zip_path = os.path.join(out_root, f"{slug}.zip")
+        try:
+            with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.write(glb_path, "scene.glb")
+                zf.write(meta_path, "meta.json")
+        except Exception as exc:
+            self.report({"WARNING"}, f"ZIP creation failed: {exc}, GLB+JSON exported separately")
+
+        self.report({"INFO"}, f"Exported to {scene_dir}" + (f" + {zip_path}" if os.path.exists(zip_path) else ""))
         return {"FINISHED"}
 
 
