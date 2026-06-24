@@ -1,9 +1,11 @@
+const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
 const PORT = process.env.PORT || 3456;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3457;
 const SCENES_DIR = path.resolve(__dirname, '..', 'public', 'scenes');
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
@@ -109,9 +111,15 @@ const server = http.createServer(async (req, res) => {
         
         const parts = parseMultipart(buf, boundaryMatch[1]);
         const metadata = parts.metadata ? JSON.parse(parts.metadata) : {};
-        const slug = metadata.slug || 'scene';
-        
-        const sceneDir = path.join(SCENES_DIR, slug);
+        const metaClean = metadata ? metadata.replace(/\r/g, '').trim() : '{}';
+        let metaParsed;
+        try {
+          metaParsed = JSON.parse(metaClean);
+        } catch(e) {
+          metaParsed = {};
+        }
+        const slug = metaParsed.slug || 'scene';
+        let sceneDir = path.join(SCENES_DIR, slug);
         fs.mkdirSync(sceneDir, { recursive: true });
         
         const scanResults = [];
@@ -138,8 +146,21 @@ const server = http.createServer(async (req, res) => {
         }
         
         if (metadata) {
-          const metaClean = metadata.replace(/\r/g, '').trim();
-          fs.writeFileSync(path.join(sceneDir, 'meta.json'), JSON.stringify(JSON.parse(metaClean), null, 2));
+          try {
+            const metaClean = metadata.replace(/\r/g, '').replace(/\n/g, '').trim();
+            const metaParsed = JSON.parse(metaClean);
+            fs.writeFileSync(path.join(sceneDir, 'meta.json'), JSON.stringify(metaParsed, null, 2));
+            const slugFromMeta = metaParsed.slug || slug;
+            if (slugFromMeta !== slug) {
+              const newDir = path.join(SCENES_DIR, slugFromMeta);
+              if (sceneDir !== newDir) {
+                fs.renameSync(sceneDir, newDir);
+                sceneDir = newDir;
+              }
+            }
+          } catch(e) {
+            fs.writeFileSync(path.join(sceneDir, 'meta.json'), metadata);
+          }
         }
         
         const pushed = gitCommit(slug, metadata);
@@ -161,7 +182,20 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n  Blender to Web Local Service`);
-  console.log(`  Port: ${PORT}`);
+  console.log(`  HTTP:  http://localhost:${PORT}`);
   console.log(`  Scenes: ${SCENES_DIR}`);
   console.log(`  Health: http://localhost:${PORT}/health\n`);
+  
+  const certPath = path.join(__dirname, 'cert.pem');
+  const keyPath = path.join(__dirname, 'key.pem');
+  if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+    const httpsOptions = {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    };
+    https.createServer(httpsOptions, server.listeners('request')[0]).listen(HTTPS_PORT, () => {
+      console.log(`  HTTPS: https://localhost:${HTTPS_PORT}`);
+      console.log(`  Health: https://localhost:${HTTPS_PORT}/health\n`);
+    });
+  }
 });

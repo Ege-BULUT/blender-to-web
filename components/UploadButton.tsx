@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useTranslation } from "@/lib/translations/useTranslation";
 
-const LOCAL_SERVICE_URL = "http://localhost:3456/upload";
+const LOCAL_SERVICE_URL = "https://localhost:3457/upload";
 
 export default function UploadButton() {
   const [open, setOpen] = useState(false);
@@ -100,10 +100,13 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
       
       let uploadUrl = "/api/upload";
       try {
-        const healthCheck = await fetch("http://localhost:3456/health", { method: "GET" });
+        const healthCheck = await fetch("https://localhost:3457/health", { method: "GET" });
         if (healthCheck.ok) uploadUrl = LOCAL_SERVICE_URL;
       } catch {
-        // Local service not available, use API
+        try {
+          const healthCheckHttp = await fetch("http://localhost:3456/health", { method: "GET" });
+          if (healthCheckHttp.ok) uploadUrl = "http://localhost:3456/upload";
+        } catch {}
       }
       
       const response = await fetch(uploadUrl, {
