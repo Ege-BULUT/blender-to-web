@@ -42,7 +42,7 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
   const { theme, setTheme } = useAppContext();
   const [menuOpen, setMenuOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [exportMeta, setExportMeta] = useState({ slug: scene.slug, title: scene.title, description: scene.description || "", tags: (scene.tags || []).join(", ") });
+  const [exportMeta, setExportMeta] = useState({ slug: scene.slug, title: scene.title, description: scene.description || "", tags: (scene.tags || []).join(", "), author: scene.author || "" });
   const [cameraDefault] = useState<{ position: Vec3; target: Vec3 } | null>(
     scene.camera_default ?? null
   );
@@ -194,6 +194,7 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
       title: scene.title + " (Edited)",
       description: scene.description || "",
       tags: (scene.tags || []).join(", "),
+      author: scene.author || "",
     });
     setExportModalOpen(true);
     setMenuOpen(false);
@@ -209,6 +210,7 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
       slug: exportMeta.slug,
       title: exportMeta.title,
       description: exportMeta.description,
+      author: exportMeta.author,
       tags,
       created_at: new Date().toISOString(),
       exporter_version: "web-editor",
@@ -465,6 +467,15 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
                   value={exportMeta.tags}
                   onChange={(e) => setExportMeta({ ...exportMeta, tags: e.target.value })}
                   placeholder="tag1, tag2, tag3"
+                />
+              </div>
+              <div className="form-row">
+                <label>Yazar</label>
+                <input
+                  type="text"
+                  value={exportMeta.author}
+                  onChange={(e) => setExportMeta({ ...exportMeta, author: e.target.value })}
+                  placeholder="Author name"
                 />
               </div>
             </div>

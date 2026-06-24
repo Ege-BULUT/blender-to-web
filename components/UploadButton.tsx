@@ -217,6 +217,15 @@ function DragDropUploadModal({ onClose }: { onClose: () => void }) {
                 placeholder="tag1, tag2, tag3"
               />
             </div>
+            <div className="form-row">
+              <label>{t("metadataAuthor")}</label>
+              <input
+                type="text"
+                value={metadata?.author || ""}
+                onChange={(e) => setMetadata({...metadata, author: e.target.value})}
+                placeholder="Author name"
+              />
+            </div>
           </div>
           
           <div className="modal-actions">

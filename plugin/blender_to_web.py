@@ -54,6 +54,7 @@ def write_meta(path: str, props) -> None:
         "slug": props.slug,
         "title": props.title,
         "description": props.description,
+        "author": getattr(props, "author", ""),
         "tags": [t.strip() for t in props.tags.split(",") if t.strip()] if props.tags else [],
         "created_at": datetime.now(timezone.utc).isoformat(),
         "blender_version": bpy.app.version_string,
@@ -85,6 +86,11 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
     tags: bpy.props.StringProperty(
         name="Tags",
         description="Virgülle ayrilmis etiketler (örn: interior, morning)",
+        default="",
+    )
+    author: bpy.props.StringProperty(
+        name="Author",
+        description="Sahne sahibi / yazar adi",
         default="",
     )
     slug: bpy.props.StringProperty(

@@ -547,6 +547,13 @@ code {
   color: var(--text-primary);
 }
 
+.carousel-card .card-author {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-style: italic;
+}
+
 .carousel-card .card-desc {
   font-size: 12px;
   color: var(--text-secondary);

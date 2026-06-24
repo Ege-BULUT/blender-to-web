@@ -5,6 +5,7 @@ export interface SceneMeta {
   title: string;
   description?: string;
   tags?: string[];
+  author?: string;
   created_at?: string;
   blender_version?: string;
   exporter_version?: string;

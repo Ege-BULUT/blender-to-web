@@ -85,6 +85,7 @@ export default function GalleryClient({ scenes }: { scenes: SceneEntry[] }) {
               <div className="card-meta">
                 <div className="card-title">{s.title}</div>
                 {s.description ? <div className="card-desc">{s.description}</div> : null}
+                {s.author ? <div className="card-author">{s.author}</div> : null}
                 {s.tags && s.tags.length > 0 ? (
                   <div className="card-tags">
                     {s.tags.map((t) => (
