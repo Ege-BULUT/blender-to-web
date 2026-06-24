@@ -41,6 +41,8 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { theme, setTheme } = useAppContext();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportMeta, setExportMeta] = useState({ slug: scene.slug, title: scene.title, description: scene.description || "", tags: (scene.tags || []).join(", ") });
   const [cameraDefault] = useState<{ position: Vec3; target: Vec3 } | null>(
     scene.camera_default ?? null
   );
@@ -187,20 +189,51 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
   }
 
   async function exportGlb() {
+    setExportMeta({
+      slug: scene.slug + "_edited",
+      title: scene.title + " (Edited)",
+      description: scene.description || "",
+      tags: (scene.tags || []).join(", "),
+    });
+    setExportModalOpen(true);
+    setMenuOpen(false);
+  }
+
+  async function doExport() {
     const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js");
     const exporter = new GLTFExporter();
     const root = sceneRef.current;
     if (!root) return;
+    const tags = exportMeta.tags.split(",").map((s) => s.trim()).filter(Boolean);
+    const meta = {
+      slug: exportMeta.slug,
+      title: exportMeta.title,
+      description: exportMeta.description,
+      tags,
+      created_at: new Date().toISOString(),
+      exporter_version: "web-editor",
+      scene_name: scene.scene_name || scene.title,
+      camera_default: cameraDefault,
+    };
+    const metaJson = JSON.stringify(meta, null, 2);
     exporter.parse(
       root,
       (result) => {
-        const blob = new Blob([result as ArrayBuffer], { type: "model/gltf-binary" });
-        const url = URL.createObjectURL(blob);
+        const glbBlob = new Blob([result as ArrayBuffer], { type: "model/gltf-binary" });
+        const glbUrl = URL.createObjectURL(glbBlob);
         const a = document.createElement("a");
-        a.href = url;
-        a.download = `${scene.slug}_edited.glb`;
+        a.href = glbUrl;
+        a.download = "scene.glb";
         a.click();
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(glbUrl);
+        const metaBlob = new Blob([metaJson], { type: "application/json" });
+        const metaUrl = URL.createObjectURL(metaBlob);
+        const b = document.createElement("a");
+        b.href = metaUrl;
+        b.download = "meta.json";
+        b.click();
+        URL.revokeObjectURL(metaUrl);
+        setExportModalOpen(false);
       },
       (err) => console.error("export error", err),
       { binary: true }
@@ -391,6 +424,61 @@ export default function EditorClient({ scene }: { scene: SceneEntry }) {
           Kamera: WASD + sag-tik fly, scroll dolly, orta-tik orbit
         </span>
       </div>
+
+      {exportModalOpen && (
+        <div className="modal-overlay" onClick={() => setExportModalOpen(false)}>
+          <div className="modal large" onClick={(e) => e.stopPropagation()}>
+            <h3>Sahne Bilgileri</h3>
+            <p>Export öncesi metadata düzenle. scene.glb ve meta.json birlikte indirilecek.</p>
+            <div className="metadata-form">
+              <div className="form-row">
+                <label>Slug (URL)</label>
+                <input
+                  type="text"
+                  value={exportMeta.slug}
+                  onChange={(e) => setExportMeta({ ...exportMeta, slug: e.target.value })}
+                  placeholder="scene-name"
+                />
+              </div>
+              <div className="form-row">
+                <label>Başlık</label>
+                <input
+                  type="text"
+                  value={exportMeta.title}
+                  onChange={(e) => setExportMeta({ ...exportMeta, title: e.target.value })}
+                  placeholder="Scene Title"
+                />
+              </div>
+              <div className="form-row">
+                <label>Açıklama</label>
+                <textarea
+                  value={exportMeta.description}
+                  onChange={(e) => setExportMeta({ ...exportMeta, description: e.target.value })}
+                  placeholder="Scene description..."
+                  rows={3}
+                />
+              </div>
+              <div className="form-row">
+                <label>Etiketler (virgülle ayır)</label>
+                <input
+                  type="text"
+                  value={exportMeta.tags}
+                  onChange={(e) => setExportMeta({ ...exportMeta, tags: e.target.value })}
+                  placeholder="tag1, tag2, tag3"
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="modal-close" onClick={() => setExportModalOpen(false)}>
+                İptal
+              </button>
+              <button className="btn-primary" onClick={doExport}>
+                Export
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
