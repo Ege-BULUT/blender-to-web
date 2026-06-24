@@ -1,0 +1,14 @@
+{
+  "slug": "sample_box",
+  "title": "Sample Box",
+  "description": "Khronos glTF sample. Eklenti output ile ayni sema, klasorde scene.glb + meta.json.",
+  "tags": ["sample", "khronos"],
+  "created_at": "2026-06-24T12:00:00Z",
+  "blender_version": "n/a",
+  "exporter_version": "0.1.0",
+  "scene_name": "Box",
+  "camera_default": {
+    "position": [3, 2, 5],
+    "target": [0, 0.5, 0]
+  }
+}

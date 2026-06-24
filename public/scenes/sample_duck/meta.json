@@ -1,0 +1,14 @@
+{
+  "slug": "sample_duck",
+  "title": "Rubber Duck",
+  "description": "Khronos Duck sample. Cesitli geometri ve material tiplerini test etmek için.",
+  "tags": ["sample", "khronos", "duck"],
+  "created_at": "2026-06-24T12:00:00Z",
+  "blender_version": "n/a",
+  "exporter_version": "0.1.0",
+  "scene_name": "Duck",
+  "camera_default": {
+    "position": [3, 2, 4],
+    "target": [0, 0.3, 0]
+  }
+}
