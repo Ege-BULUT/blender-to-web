@@ -15,7 +15,7 @@ import re
 import zipfile
 from datetime import datetime, timezone
 
-EXPORTER_VERSION = "0.3.0"
+EXPORTER_VERSION = "0.3.1"
 
 
 def slugify(value: str) -> str:
@@ -200,6 +200,17 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
             except Exception as exc:
                 self.report({"WARNING"}, f"Texture resize failed: {exc}")
 
+        for obj in context.scene.objects:
+            if obj.type == 'MESH':
+                for mod in obj.modifiers:
+                    try:
+                        context.view_layer.objects.active = obj
+                        obj.select_set(True)
+                        bpy.ops.object.modifier_apply(modifier=mod.name)
+                    except Exception:
+                        pass
+                obj.select_set(False)
+
         try:
             bpy.ops.export_scene.gltf(
                 filepath=glb_path,
@@ -262,13 +273,13 @@ class WEBGALLERY_OT_export(bpy.types.Operator):
         for img in bpy.data.images:
             if img.name == 'Render Result':
                 continue
+            if not img.has_data:
+                continue
             if img.size[0] > max_size or img.size[1] > max_size:
                 ratio = min(max_size / img.size[0], max_size / img.size[1])
-                new_w = int(img.size[0] * ratio)
-                new_h = int(img.size[1] * ratio)
+                new_w = max(1, int(img.size[0] * ratio))
+                new_h = max(1, int(img.size[1] * ratio))
                 img.scale(new_w, new_h)
-                img.file_format = 'JPEG'
-                img.quality = self.jpeg_quality
 
 
 def menu_func_export(self, context):
