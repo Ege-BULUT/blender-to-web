@@ -1,0 +1,22 @@
+{
+  "slug": "donut_scene",
+  "title": "Blender Donut Scene",
+  "description": "Blender Complex Donut Scene",
+  "author": "EgeBULUT",
+  "tags": [
+    "Blender",
+    "VeryComplex"
+  ],
+  "created_at": "2026-06-25T00:00:16.232804+00:00",
+  "blender_version": "5.1.2",
+  "exporter_version": "0.3.0",
+  "scene_name": "Donut Scene, Fully Animated",
+  "camera_default": null,
+  "export_settings": {
+    "max_texture_size": 512,
+    "jpeg_quality": 85,
+    "bake_textures": true,
+    "include_cameras": false,
+    "include_lights": true
+  }
+}
