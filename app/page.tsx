@@ -7,6 +7,7 @@ import GallerySection from "@/components/GallerySection";
 import Header from "@/components/Header";
 
 export const revalidate = 0;
+export const metadata = { alternates: { canonical: "/" } };
 
 export default async function Page() {
   const scenes = await listScenes();
